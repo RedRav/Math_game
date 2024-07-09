@@ -15,17 +15,44 @@ using System.Windows.Shapes;
 
 namespace Math_game
 {
+    using System.Windows.Threading;
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        DispatcherTimer Timer = new DispatcherTimer();
+        int tenthsOfSecondsElapsed;
+        int matchesFound;
+
+        private void TimeTextBlock_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (matchesFound == 8)
+            {
+                SetUpGame();
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
 
+            Timer.Interval = TimeSpan.FromSeconds(.1);
+            Timer.Tick += Timer_Tick;
             SetUpGame();
 
+        }
+
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            tenthsOfSecondsElapsed++;
+            timeTextBlock.Text = (tenthsOfSecondsElapsed / 10F).ToString("0.0s");
+            if (matchesFound == 8)
+            {
+                Timer.Stop();
+                timeTextBlock.Text = timeTextBlock.Text + " - Play again?";
+            }
         }
 
         private void SetUpGame()
@@ -45,11 +72,47 @@ namespace Math_game
 
             foreach (TextBlock textBlock in mainGrid.Children.OfType<TextBlock>())
             {
-                int index = random.Next(0, animalEmoji.Count);
-                string nextEmoji = animalEmoji[index];
-                textBlock.Text = nextEmoji;
-                animalEmoji.RemoveAt(index);
+                if(textBlock.Name != "timeTextBlock") 
+                {
+                    int index = random.Next(0, animalEmoji.Count);
+                    string nextEmoji = animalEmoji[index];
+                    textBlock.Text = nextEmoji;
+                    animalEmoji.RemoveAt(index);
+                    textBlock.MouseDown += TextBlock_MouseDown;
+                }
+                                         //максим
+            }
+            Timer.Start();
+            tenthsOfSecondsElapsed = 0;
+            matchesFound = 0;
+        }
+
+        private TextBlock _lastTextBlock;
+        private bool _findingMatch;
+
+        private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            TextBlock textBlock = sender as TextBlock;
+
+            if(_findingMatch == false)
+            {
+                _lastTextBlock = textBlock;
+                textBlock.Visibility = Visibility.Hidden;
+                _findingMatch = true;
+            }
+            else if(textBlock.Text == _lastTextBlock.Text)
+            {
+                matchesFound++;
+                textBlock.Visibility = Visibility.Hidden;
+                _findingMatch = false;
+            }
+            else
+            {
+                _lastTextBlock.Visibility = Visibility.Visible;
+                _findingMatch = false;
             }
         }
+
+        
     }
 }
