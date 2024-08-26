@@ -72,15 +72,22 @@ namespace Math_game
 
             foreach (TextBlock textBlock in mainGrid.Children.OfType<TextBlock>())
             {
-                if(textBlock.Name != "timeTextBlock") 
+                if (textBlock.Name != "timeTextBlock")
                 {
                     int index = random.Next(0, animalEmoji.Count);
                     string nextEmoji = animalEmoji[index];
                     textBlock.Text = nextEmoji;
                     animalEmoji.RemoveAt(index);
-                    textBlock.MouseDown += TextBlock_MouseDown;
+                    if (textBlock.Visibility == Visibility.Visible)
+                    {
+                        textBlock.MouseDown += TextBlock_MouseDown;                                        //максим
+                    }
+                    textBlock.Visibility = Visibility.Visible;
                 }
-                                         //максим
+                else
+                {
+                    textBlock.MouseDown += TimeTextBlock_MouseDown;
+                }
             }
             Timer.Start();
             tenthsOfSecondsElapsed = 0;
